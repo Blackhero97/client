@@ -68,7 +68,33 @@ export default function Dashboard() {
   const [selectedChild, setSelectedChild] = useState(null);
   const receiptRef = useRef();
   const itemsPerPage = 10;
-  const baseCost = 50000;
+  // Sozlamalarni yuklash
+  const [settings, setSettings] = useState({
+    basePrice: 30000,
+    hourlyRate: 30000,
+    overtimeRate: 5000,
+  });
+
+  useEffect(() => {
+    const loadSettings = () => {
+      try {
+        const savedSettings = localStorage.getItem("crmSettings");
+        if (savedSettings) {
+          const parsed = JSON.parse(savedSettings);
+          setSettings({
+            basePrice: parsed.basePrice || 30000,
+            hourlyRate: parsed.hourlyRate || 30000,
+            overtimeRate: parsed.overtimeRate || 5000,
+          });
+        }
+      } catch (error) {
+        console.error("Sozlamalarni yuklashda xatolik:", error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const baseCost = settings.basePrice;
   const [currentPage, setCurrentPage] = useState(1);
   const [lastCode, setLastCode] = useState("");
 
@@ -262,14 +288,14 @@ export default function Dashboard() {
         token_code: "4780080520556",
         entry_time: "2025-08-30T05:14:00.020Z",
         exit_time: "",
-        paid_amount: 50000,
+        paid_amount: settings.basePrice,
       },
       {
         _id: "98b423fc-8fd3-4a0e-ba97-4f106d6caad6",
         token_code: "4780080520557",
         entry_time: "2025-08-30T05:00:00.020Z",
         exit_time: "2025-08-30T06:00:00.020Z",
-        paid_amount: 50000,
+        paid_amount: settings.basePrice,
       },
     ]);
   }, []);
@@ -624,7 +650,7 @@ export default function Dashboard() {
             {/* Header */}
             <div style={{ textAlign: "center", marginBottom: "8px" }}>
               <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-                WUNDERLAND
+                DREAM LAND
               </div>
               <div style={{ fontSize: "10px" }}>Bolalar O'yin Markazi</div>
               <div style={{ fontSize: "10px" }}>Tel: +998 90 123 45 67</div>

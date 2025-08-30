@@ -178,5 +178,21 @@ export const jetonsApi = {
   validate: (code) => dataOf(api.post(`/jetons/validate`, { code })),
 };
 
+/* ======================
+   System Management
+   ====================== */
+export const systemApi = {
+  // Barcha ma'lumotlarni o'chirish (adminlar uchun)
+  clearAllData: () => dataOf(api.delete(`/system/clear-all`)),
+  // Children ma'lumotlarini o'chirish
+  clearChildren: () => dataOf(api.delete(`/system/clear-children`)),
+  // History ma'lumotlarini o'chirish
+  clearHistory: () => dataOf(api.delete(`/system/clear-history`)),
+  // Jetonlarni o'chirish
+  clearJetons: () => dataOf(api.delete(`/system/clear-jetons`)),
+  // Database statistikasi
+  getStats: () => dataOf(api.get(`/system/stats`)),
+};
+
 console.log("API baseURL:", baseURL);
 export default api;

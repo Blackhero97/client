@@ -1,5 +1,6 @@
 // src/components/Settings.jsx
 import { useState, useEffect } from "react";
+import { systemApi } from "../lib/api.js";
 import {
   Settings as SettingsIcon,
   Save,
@@ -14,19 +15,21 @@ import {
   Wifi,
   Monitor,
   Volume2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
-const Settings = () => {
+const Settings = ({ onLogout }) => {
   const [settings, setSettings] = useState({
     // Umumiy sozlamalar
-    companyName: "Wunderland",
+    companyName: "Dream Land",
     companyPhone: "+998 90 123 45 67",
     companyAddress: "Chust shahar, O'yin markazi",
 
     // Narx sozlamalari
-    basePrice: 50000,
-    hourlyRate: 50000,
-    overtimeRate: 10000,
+    basePrice: 30000, // 30,000 so'm
+    hourlyRate: 30000,
+    overtimeRate: 5000, // 10 daqiqaga 5000, ya'ni 1 daqiqaga 500
 
     // Vaqt sozlamalari
     defaultSessionTime: 60, // daqiqada
@@ -57,10 +60,22 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  
+  // Server Management state
+  const [serverStats, setServerStats] = useState(null);
+  const [clearing, setClearing] = useState(false);
+  
+  // Login Settings state
+  const [loginSettings, setLoginSettings] = useState({
+    username: "dream",
+    password: "20250830",
+  });
+  const [showPassword, setShowPassword] = useState(false);
 
   // Sozlamalarni yuklash
   useEffect(() => {
     loadSettings();
+    loadLoginSettings();
   }, []);
 
   const loadSettings = () => {
@@ -71,6 +86,27 @@ const Settings = () => {
       }
     } catch (error) {
       console.error("Sozlamalarni yuklashda xatolik:", error);
+    }
+  };
+
+  const loadLoginSettings = () => {
+    try {
+      const savedLogin = localStorage.getItem("loginSettings");
+      if (savedLogin) {
+        setLoginSettings(JSON.parse(savedLogin));
+      }
+    } catch (error) {
+      console.error("Login sozlamalarini yuklashda xatolik:", error);
+    }
+  };
+
+  const saveLoginSettings = () => {
+    try {
+      localStorage.setItem("loginSettings", JSON.stringify(loginSettings));
+      alert("Login ma'lumotlari saqlandi. Keyingi kirishda yangi ma'lumotlar ishlatiladi.");
+    } catch (error) {
+      console.error("Login sozlamalarini saqlashda xatolik:", error);
+      alert("Login sozlamalarini saqlashda xatolik yuz berdi");
     }
   };
 
@@ -101,6 +137,55 @@ const Settings = () => {
     }
   };
 
+  // Server Management funksiyalari
+  const loadServerStats = async () => {
+    try {
+      const stats = await systemApi.getStats();
+      setServerStats(stats);
+    } catch (error) {
+      console.error("Server statistikasini yuklashda xatolik:", error);
+    }
+  };
+
+  const clearServerData = async (type) => {
+    const confirmMessages = {
+      'all': 'Barcha ma\'lumotlarni o\'chirishni tasdiqlaysizmi? Bu amal QAYTARIB BO\'LMAYDI!',
+      'children': 'Children ma\'lumotlarini o\'chirishni tasdiqlaysizmi?',
+      'history': 'History ma\'lumotlarini o\'chirishni tasdiqlaysizmi?', 
+      'jetons': 'Barcha jetonlarni o\'chirishni tasdiqlaysizmi?'
+    };
+
+    if (!confirm(confirmMessages[type])) return;
+
+    try {
+      setClearing(true);
+      let result;
+      
+      switch (type) {
+        case 'all':
+          result = await systemApi.clearAllData();
+          break;
+        case 'children':
+          result = await systemApi.clearChildren();
+          break;
+        case 'history':
+          result = await systemApi.clearHistory();
+          break;
+        case 'jetons':
+          result = await systemApi.clearJetons();
+          break;
+      }
+
+      alert(`${result.message}`);
+      loadServerStats(); // Statistikani yangilash
+    } catch (error) {
+      console.error("Ma'lumotlarni o'chirishda xatolik:", error);
+      alert("Ma'lumotlarni o'chirishda xatolik yuz berdi");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const handleChange = (key, value) => {
     setSettings((prev) => ({
       ...prev,
@@ -115,6 +200,7 @@ const Settings = () => {
     { id: "audio", name: "Audio", icon: Volume2 },
     { id: "printer", name: "Printer", icon: Printer },
     { id: "system", name: "Sistema", icon: Database },
+    { id: "server", name: "Server", icon: RefreshCw },
     { id: "security", name: "Xavfsizlik", icon: Shield },
   ];
 
@@ -575,6 +661,102 @@ const Settings = () => {
               </div>
             )}
 
+            {/* Server Management */}
+            {activeTab === "server" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Server Boshqaruvi
+                  </h2>
+                  <button
+                    onClick={loadServerStats}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Yangilash
+                  </button>
+                </div>
+
+                {/* Server Statistikasi */}
+                {serverStats && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {serverStats.children}
+                      </div>
+                      <div className="text-sm text-gray-600">Children</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {serverStats.activeChildren}
+                      </div>
+                      <div className="text-sm text-gray-600">Ichkarida</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {serverStats.history}
+                      </div>
+                      <div className="text-sm text-gray-600">History</div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {serverStats.jetons}
+                      </div>
+                      <div className="text-sm text-gray-600">Jetonlar</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Server Tozalash Tugmalari */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-red-800 mb-4">
+                    ⚠️ Xavfli Amallar
+                  </h3>
+                  <p className="text-red-700 text-sm mb-4">
+                    Quyidagi amallar qaytarib bo'lmaydi. Ehtiyot bilan ishlating!
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                      onClick={() => clearServerData('children')}
+                      disabled={clearing}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 text-white rounded-md transition-colors"
+                    >
+                      <Users className="w-4 h-4" />
+                      Children Tozalash
+                    </button>
+                    
+                    <button
+                      onClick={() => clearServerData('history')}
+                      disabled={clearing}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-md transition-colors"
+                    >
+                      <Clock className="w-4 h-4" />
+                      History Tozalash
+                    </button>
+                    
+                    <button
+                      onClick={() => clearServerData('jetons')}
+                      disabled={clearing}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-md transition-colors"
+                    >
+                      <Database className="w-4 h-4" />
+                      Jetonlar Tozalash
+                    </button>
+                    
+                    <button
+                      onClick={() => clearServerData('all')}
+                      disabled={clearing}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white rounded-md transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      {clearing ? "Tozalanmoqda..." : "BARCHASI"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Xavfsizlik sozlamalar */}
             {activeTab === "security" && (
               <div className="space-y-6">
@@ -636,6 +818,84 @@ const Settings = () => {
                         daq
                       </span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Login Settings */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mt-6">
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-4">
+                    🔐 Login Ma'lumotlari
+                  </h3>
+                  <p className="text-yellow-700 text-sm mb-4">
+                    Tizimga kirish uchun foydalanuvchi nomi va parolni o'zgartiring
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Foydalanuvchi nomi
+                      </label>
+                      <input
+                        type="text"
+                        value={loginSettings.username}
+                        onChange={(e) =>
+                          setLoginSettings({
+                            ...loginSettings,
+                            username: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Login nomi"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Parol
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={loginSettings.password}
+                          onChange={(e) =>
+                            setLoginSettings({
+                              ...loginSettings,
+                              password: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Yangi parol"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mt-4">
+                    <button
+                      onClick={saveLoginSettings}
+                      className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
+                    >
+                      <Save className="w-4 h-4" />
+                      Login Ma'lumotlarini Saqlash
+                    </button>
+                    
+                    <button
+                      onClick={onLogout}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+                    >
+                      Tizimdan Chiqish
+                    </button>
                   </div>
                 </div>
               </div>

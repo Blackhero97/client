@@ -555,7 +555,7 @@ export default function Dashboard() {
             {/* Header */}
             <div style={{ textAlign: "center", marginBottom: "8px" }}>
               <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-                WUNDERLAND
+                DREAM LAND
               </div>
               <div style={{ fontSize: "10px" }}>Bolalar O'yin Markazi</div>
               <div style={{ fontSize: "10px" }}>Tel: +998 90 123 45 67</div>

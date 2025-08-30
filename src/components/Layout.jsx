@@ -11,7 +11,7 @@ import {
   Receipt,
 } from "lucide-react";
 
-const Layout = () => {
+const Layout = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -108,16 +108,25 @@ const Layout = () => {
         {/* Footer */}
         <div className="absolute bottom-0 w-full p-6">
           <div className="bg-blue-50 rounded-lg p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600">A</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600">A</span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-700">Admin</p>
+                  <p className="text-xs text-gray-500">Tizim boshqaruvchisi</p>
                 </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">Admin</p>
-                <p className="text-xs text-gray-500">Tizim boshqaruvchisi</p>
-              </div>
+              <button
+                onClick={onLogout}
+                className="text-xs text-red-600 hover:text-red-800 font-medium transition-colors"
+                title="Chiqish"
+              >
+                Chiqish
+              </button>
             </div>
           </div>
         </div>
