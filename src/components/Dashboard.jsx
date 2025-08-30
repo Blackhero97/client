@@ -169,6 +169,7 @@ export default function Dashboard({ darkMode }) {
 
       // Jeton bazada mavjud bo'lsa, sessionga qo'shish
       console.log("Jeton bazada topildi:", jetonResult.jeton);
+      const jetonData = jetonResult.jeton;
 
       const res = await childrenApi.scan(cleanCode);
       await fetchChildren();
@@ -176,9 +177,10 @@ export default function Dashboard({ darkMode }) {
       if (res?.action === "checkin") {
         alert(
           `✅ Kirish rasmiylashtirildi!\n\n` +
-            `Jeton: ${cleanCode}\n` +
-            `Bola: ${jetonResult.jeton.child_name || "Noma'lum"}\n` +
-            `Vaqt: 1 soat oldindan`
+            `Jeton: ${jetonData.name || cleanCode}\n` +
+            `Tarif: ${jetonData.tariff === 'vip' ? 'VIP (cheksiz)' : 'Standard (1 soat)'}\n` +
+            `Narx: ${jetonData.price?.toLocaleString() || '30,000'} so'm\n` +
+            `Bola: ${jetonData.child_name || "Noma'lum"}`
         );
       } else if (res?.action === "checkout") {
         const r = res.receipt;
@@ -186,8 +188,8 @@ export default function Dashboard({ darkMode }) {
         const total = r?.total?.toLocaleString("uz-UZ") || "";
         alert(
           `✅ Chiqish rasmiylashtirildi!\n\n` +
-            `Jeton: ${cleanCode}\n` +
-            `Bola: ${jetonResult.jeton.child_name || "Noma'lum"}\n` +
+            `Jeton: ${jetonData.name || cleanCode}\n` +
+            `Bola: ${jetonData.child_name || "Noma'lum"}\n` +
             `Qo'shimcha: ${extra} daqiqa\n` +
             `Jami: ${total} so'm`
         );
@@ -585,10 +587,21 @@ export default function Dashboard({ darkMode }) {
 
                   <td className="p-3 text-center font-medium">
                     {!child.exit_time
-                      ? child.paid_amount
+                      ? child.jeton_price 
+                        ? child.jeton_price.toLocaleString()
+                        : child.paid_amount
                         ? child.paid_amount.toLocaleString()
                         : baseCost.toLocaleString()
                       : child.paid_amount?.toLocaleString() || 0}
+                    {child.jeton_tariff && (
+                      <div className={`text-xs mt-1 px-2 py-1 rounded-full inline-block ml-2 ${
+                        child.jeton_tariff === 'vip' 
+                          ? darkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-800'
+                          : darkMode ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {child.jeton_tariff === 'vip' ? 'VIP' : 'Standard'}
+                      </div>
+                    )}
                   </td>
 
                   <td className="p-3">
