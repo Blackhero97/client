@@ -24,13 +24,36 @@ const PUBLIC_PATHS = [
    ====================== */
 const api = axios.create({
   baseURL,
-  timeout: 10000,
-  withCredentials: false, // cookie kerak bo'lsa true qiling va CORS ni moslang
+  timeout: 15000, // Render serveriga ko'proq vaqt berish
+  withCredentials: false, // CORS uchun false
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
+
+// Request interceptor - barcha so'rovlarni log qilish
+api.interceptors.request.use((config) => {
+  console.log(`🔄 API Request: ${config.method?.toUpperCase()} ${baseURL}${config.url}`);
+  return config;
+});
+
+// Response interceptor - xatoliklarni log qilish
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ API Success: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status);
+    return response;
+  },
+  (error) => {
+    console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    return Promise.reject(error);
+  }
+);
 
 /* ======================
    Token helperlar
