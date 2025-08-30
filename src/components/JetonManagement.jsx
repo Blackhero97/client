@@ -157,6 +157,30 @@ const JetonManagement = ({ darkMode }) => {
   // Form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Client-side validation
+    if (!formData.code.trim()) {
+      Swal.fire({
+        title: 'Xatolik!',
+        text: 'Jeton kodi majburiy',
+        icon: 'error',
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      Swal.fire({
+        title: 'Xatolik!',
+        text: 'Jeton nomi majburiy',
+        icon: 'error',
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
+      return;
+    }
+
     try {
       let savedJeton;
       if (editingJeton) {
@@ -165,6 +189,7 @@ const JetonManagement = ({ darkMode }) => {
         savedJeton = { ...editingJeton, ...formData };
       } else {
         // Yangi yaratish
+        console.log("🆕 Jeton yaratilmoqda:", formData);
         savedJeton = await jetonsApi.create(formData);
         // Yangi jeton uchun chek chiqarish
         setPrintJeton(savedJeton);
@@ -185,12 +210,27 @@ const JetonManagement = ({ darkMode }) => {
 
       // Listni yangilash
       loadJetons();
+      
+      Swal.fire({
+        title: 'Muvaffaqiyatli!',
+        text: editingJeton ? 'Jeton yangilandi' : 'Jeton qo\'shildi',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
     } catch (error) {
       console.error("Jeton saqlashda xatolik:", error);
-      alert(
-        "Jeton saqlashda xatolik yuz berdi: " +
-          (error.response?.data?.error || error.message)
-      );
+      const errorMessage = error.response?.data?.error || error.message || 'Noma\'lum xatolik';
+      
+      Swal.fire({
+        title: 'Xatolik!',
+        text: `Jeton saqlashda xatolik: ${errorMessage}`,
+        icon: 'error',
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
     }
   };
 
@@ -413,7 +453,7 @@ const JetonManagement = ({ darkMode }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Jeton Nomi
+                  Jeton Nomi <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -423,6 +463,7 @@ const JetonManagement = ({ darkMode }) => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Jeton 1, Jeton 2, ..."
+                  required
                 />
               </div>
 
