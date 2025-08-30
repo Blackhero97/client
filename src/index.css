@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* POS Printer CSS - 58mm chek uchun */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-receipt {
+    display: block !important;
+    width: 58mm;
+    margin: 0;
+    padding: 0;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.2;
+    color: black !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Boshqa elementlarni yashirish */
+  body > *:not(.print-receipt) {
+    display: none !important;
+  }
+
+  /* Sahifa sozlamalari */
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+}
