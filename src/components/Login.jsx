@@ -1,8 +1,8 @@
 // src/components/Login.jsx
 import { useState, useEffect } from "react";
-import { Lock, User, Eye, EyeOff } from "lucide-react";
+import { Lock, User, Eye, EyeOff, Moon, Sun } from "lucide-react";
 
-const Login = ({ onLogin }) => {
+const Login = ({ onLogin, darkMode, toggleDarkMode }) => {
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
@@ -60,22 +60,68 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+    <div
+      className={`min-h-screen flex items-center justify-center ${
+        darkMode
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900"
+          : "bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600"
+      }`}
+    >
+      <div
+        className={`rounded-xl shadow-2xl p-8 w-full max-w-md ${
+          darkMode ? "bg-gray-800 border border-gray-700" : "bg-white"
+        }`}
+      >
+        {/* Dark Mode Toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleDarkMode}
+            className={`p-2 rounded-full transition-colors ${
+              darkMode
+                ? "bg-gray-700 hover:bg-gray-600 text-yellow-400"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+            }`}
+          >
+            {darkMode ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4">
+          <div
+            className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+              darkMode
+                ? "bg-gradient-to-br from-indigo-500 to-purple-600"
+                : "bg-gradient-to-br from-blue-500 to-indigo-600"
+            }`}
+          >
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1
+            className={`text-2xl font-bold mb-2 ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Dream Land CRM
           </h1>
-          <p className="text-gray-600">Tizimga kirish uchun login qiling</p>
+          <p className={`${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+            Tizimga kirish uchun login qiling
+          </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+          <div
+            className={`border px-4 py-3 rounded-lg mb-6 ${
+              darkMode
+                ? "bg-red-900/50 border-red-800 text-red-300"
+                : "bg-red-50 border-red-200 text-red-700"
+            }`}
+          >
             {error}
           </div>
         )}
@@ -84,16 +130,28 @@ const Login = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Foydalanuvchi nomi
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <User
+                className={`absolute left-3 top-3 w-5 h-5 ${
+                  darkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              />
               <input
                 type="text"
                 value={credentials.username}
                 onChange={(e) => handleChange("username", e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-transparent"
+                }`}
                 placeholder="Login kiriting"
                 required
                 autoComplete="username"
@@ -103,16 +161,28 @@ const Login = ({ onLogin }) => {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Parol
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Lock
+                className={`absolute left-3 top-3 w-5 h-5 ${
+                  darkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              />
               <input
                 type={showPassword ? "text" : "password"}
                 value={credentials.password}
                 onChange={(e) => handleChange("password", e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-transparent"
+                }`}
                 placeholder="Parolni kiriting"
                 required
                 autoComplete="current-password"
@@ -120,7 +190,11 @@ const Login = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                className={`absolute right-3 top-3 transition-colors ${
+                  darkMode
+                    ? "text-gray-400 hover:text-gray-300"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
@@ -135,32 +209,15 @@ const Login = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-3 rounded-md transition-colors font-medium"
+            className={`w-full py-3 rounded-lg transition-all font-medium ${
+              darkMode
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:from-indigo-400 disabled:to-purple-500 text-white'
+                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-blue-300 disabled:to-indigo-400 text-white'
+            }`}
           >
             {loading ? "Kirish..." : "Tizimga Kirish"}
           </button>
         </form>
-
-        {/* Demo Info */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-md">
-          <p className="text-sm text-gray-600 text-center">
-            <strong>Joriy login ma'lumotlar:</strong>
-            <br />
-            Login:{" "}
-            <code className="bg-gray-200 px-1 rounded">
-              {defaultLogin.username}
-            </code>
-            <br />
-            Parol:{" "}
-            <code className="bg-gray-200 px-1 rounded">
-              {defaultLogin.password}
-            </code>
-            <br />
-            <span className="text-xs text-gray-500 mt-2 block">
-              Sozlamalar bo'limidan o'zgartirishingiz mumkin
-            </span>
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 // src/components/Settings.jsx
 import { useState, useEffect } from "react";
 import { systemApi } from "../lib/api.js";
+import Swal from "sweetalert2";
 import {
   Settings as SettingsIcon,
   Save,
@@ -17,9 +18,10 @@ import {
   Volume2,
   Eye,
   EyeOff,
+  Trash2,
 } from "lucide-react";
 
-const Settings = ({ onLogout }) => {
+const Settings = ({ onLogout, darkMode }) => {
   const [settings, setSettings] = useState({
     // Umumiy sozlamalar
     companyName: "Dream Land",
@@ -155,32 +157,67 @@ const Settings = ({ onLogout }) => {
       'jetons': 'Barcha jetonlarni o\'chirishni tasdiqlaysizmi?'
     };
 
-    if (!confirm(confirmMessages[type])) return;
+    const titles = {
+      'all': 'Barcha ma\'lumotlarni o\'chirish',
+      'children': 'Bolalar ma\'lumotlarini o\'chirish',
+      'history': 'Tarix ma\'lumotlarini o\'chirish',
+      'jetons': 'Jetonlar ma\'lumotlarini o\'chirish'
+    };
+
+    const result = await Swal.fire({
+      title: titles[type],
+      text: confirmMessages[type],
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ha, o\'chir',
+      cancelButtonText: 'Bekor qilish',
+      background: darkMode ? '#1f2937' : '#ffffff',
+      color: darkMode ? '#f9fafb' : '#111827',
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       setClearing(true);
-      let result;
+      let apiResult;
       
       switch (type) {
         case 'all':
-          result = await systemApi.clearAllData();
+          apiResult = await systemApi.clearAllData();
           break;
         case 'children':
-          result = await systemApi.clearChildren();
+          apiResult = await systemApi.clearChildren();
           break;
         case 'history':
-          result = await systemApi.clearHistory();
+          apiResult = await systemApi.clearHistory();
           break;
         case 'jetons':
-          result = await systemApi.clearJetons();
+          apiResult = await systemApi.clearJetons();
           break;
       }
 
-      alert(`${result.message}`);
+      Swal.fire({
+        title: 'Muvaffaqiyatli!',
+        text: apiResult.message,
+        icon: 'success',
+        timer: 3000,
+        showConfirmButton: false,
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
+      
       loadServerStats(); // Statistikani yangilash
     } catch (error) {
       console.error("Ma'lumotlarni o'chirishda xatolik:", error);
-      alert("Ma'lumotlarni o'chirishda xatolik yuz berdi");
+      Swal.fire({
+        title: 'Xatolik!',
+        text: "Ma'lumotlarni o'chirishda xatolik yuz berdi",
+        icon: 'error',
+        background: darkMode ? '#1f2937' : '#ffffff',
+        color: darkMode ? '#f9fafb' : '#111827',
+      });
     } finally {
       setClearing(false);
     }

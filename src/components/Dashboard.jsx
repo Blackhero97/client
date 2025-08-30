@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Users, DollarSign, Calendar } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import Swal from "sweetalert2";
 import ScannerListener from "../components/ScannerListener";
 import { childrenApi, jetonsApi } from "../lib/api";
 import { useReactToPrint } from "react-to-print";
@@ -63,7 +64,7 @@ const ALLOWED_JETONS = [
   "JET-YZ1050-5214",
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ darkMode }) {
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const receiptRef = useRef();
@@ -389,30 +390,50 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className={`p-6 space-y-6 min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
       <ScannerListener onScan={handleScan} />
 
       {/* Statistik kartalar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-blue-500">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <Users className="text-blue-600 w-8 h-8" />
+        <div className={`shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-blue-500 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
+          <div className={`p-3 rounded-full ${
+            darkMode ? 'bg-blue-900/50' : 'bg-blue-100'
+          }`}>
+            <Users className={`w-8 h-8 ${
+              darkMode ? 'text-blue-400' : 'text-blue-600'
+            }`} />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Jami sessiyalar</p>
-            <h2 className="text-3xl font-extrabold text-gray-800">
+            <p className={`text-sm ${
+              darkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>Jami sessiyalar</p>
+            <h2 className={`text-3xl font-extrabold ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               {children.length}
             </h2>
           </div>
         </div>
 
-        <div className="bg-white shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-green-500">
-          <div className="bg-green-100 p-3 rounded-full">
-            <Calendar className="text-green-600 w-8 h-8" />
+        <div className={`shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-green-500 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
+          <div className={`p-3 rounded-full ${
+            darkMode ? 'bg-green-900/50' : 'bg-green-100'
+          }`}>
+            <Calendar className={`w-8 h-8 ${
+              darkMode ? 'text-green-400' : 'text-green-600'
+            }`} />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Hozir ichkarida</p>
-            <h2 className="text-3xl font-extrabold text-gray-800">
+            <p className={`text-sm ${
+              darkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>Hozir ichkarida</p>
+            <h2 className={`text-3xl font-extrabold ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               {
                 children.filter((c) => !c.exit_time)
                   .length /* Ichkarida qolganlar soni */
@@ -421,13 +442,23 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-purple-500">
-          <div className="bg-purple-100 p-3 rounded-full">
-            <DollarSign className="text-purple-600 w-8 h-8" />
+        <div className={`shadow-xl rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform duration-300 border-t-4 border-purple-500 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        }`}>
+          <div className={`p-3 rounded-full ${
+            darkMode ? 'bg-purple-900/50' : 'bg-purple-100'
+          }`}>
+            <DollarSign className={`w-8 h-8 ${
+              darkMode ? 'text-purple-400' : 'text-purple-600'
+            }`} />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Umumiy tushum</p>
-            <h2 className="text-3xl font-extrabold text-gray-800">
+            <p className={`text-sm ${
+              darkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>Umumiy tushum</p>
+            <h2 className={`text-3xl font-extrabold ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               {children
                 .reduce(
                   (sum, c) =>

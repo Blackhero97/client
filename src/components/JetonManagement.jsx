@@ -3,9 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { jetonsApi } from "../lib/api.js";
 import { useReactToPrint } from "react-to-print";
 import JsBarcode from "jsbarcode";
+import Swal from "sweetalert2";
 import ScannerListener from "./ScannerListener";
 
-const JetonManagement = () => {
+const JetonManagement = ({ darkMode }) => {
   const [jetons, setJetons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -206,28 +207,87 @@ const JetonManagement = () => {
 
   // O'chirish
   const handleDelete = async (id) => {
-    if (!confirm("Jetonni o'chirishga ishonchingiz komilmi?")) return;
+    const result = await Swal.fire({
+      title: 'Jetonni o\'chirish',
+      text: "Bu jeton butunlay o'chiriladi. Bu amalni bekor qilib bo'lmaydi!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ha, o\'chir',
+      cancelButtonText: 'Bekor qilish',
+      background: darkMode ? '#1f2937' : '#ffffff',
+      color: darkMode ? '#f9fafb' : '#111827',
+    });
 
-    try {
-      await jetonsApi.delete(id);
-      loadJetons();
-    } catch (error) {
-      console.error("Jeton o'chirishda xatolik:", error);
-      alert("Jeton o'chirishda xatolik yuz berdi");
+    if (result.isConfirmed) {
+      try {
+        await jetonsApi.delete(id);
+        loadJetons();
+        Swal.fire({
+          title: 'O\'chirildi!',
+          text: 'Jeton muvaffaqiyatli o\'chirildi',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+          background: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        });
+      } catch (error) {
+        console.error("Jeton o'chirishda xatolik:", error);
+        Swal.fire({
+          title: 'Xatolik!',
+          text: 'Jeton o\'chirishda xatolik yuz berdi',
+          icon: 'error',
+          background: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        });
+      }
     }
   };
 
   // Status o'zgartirish
   const handleToggleStatus = async (jeton) => {
-    try {
-      await jetonsApi.update(jeton._id, {
-        ...jeton,
-        isActive: !jeton.isActive,
-      });
-      loadJetons();
-    } catch (error) {
-      console.error("Status o'zgartirishda xatolik:", error);
-      alert("Status o'zgartirishda xatolik yuz berdi");
+    const action = jeton.isActive ? 'o\'chirish' : 'yoqish';
+    const result = await Swal.fire({
+      title: `Jeton holatini ${action}`,
+      text: `${jeton.name} jetoni ${action}ga ishonchingiz komilmi?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: jeton.isActive ? '#f59e0b' : '#10b981',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: `Ha, ${action}`,
+      cancelButtonText: 'Bekor qilish',
+      background: darkMode ? '#1f2937' : '#ffffff',
+      color: darkMode ? '#f9fafb' : '#111827',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await jetonsApi.update(jeton._id, {
+          ...jeton,
+          isActive: !jeton.isActive,
+        });
+        loadJetons();
+        Swal.fire({
+          title: 'O\'zgartirildi!',
+          text: `Jeton holati muvaffaqiyatli ${action}ldi`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+          background: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        });
+      } catch (error) {
+        console.error("Status o'zgartirishda xatolik:", error);
+        Swal.fire({
+          title: 'Xatolik!',
+          text: 'Status o\'zgartirishda xatolik yuz berdi',
+          icon: 'error',
+          background: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        });
+      }
     }
   };
 
